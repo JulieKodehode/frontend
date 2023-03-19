@@ -1,25 +1,36 @@
-import logo from './logo.svg';
-import './App.css';
+import { Routes, Route } from "react-router-dom";
+import Layout from "./components/layout";
+import Public from "./components/Public";
+import Login from "./features/auth/Login";
+import DashLayout from "./components/Dashboard/DashLayout";
+import Welcome from "./features/auth/Welcome";
+import NotesList from "./features/notes/NotesList";
+import UsersList from "./features/users/UsersList";
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
-}
+const App = () => {
+	return (
+		<Routes>
+			{/* Start Layout, basic layout of side */}
+			<Route path="/" element={<Layout />}>
+				{/* Two public routes, public and login */}
+				<Route index element={<Public />} />
+				<Route path="login" element={<Login />} />
+
+				{/* Start Dash, going to be private */}
+				<Route path="dash" element={<DashLayout />}>
+					<Route index element={<Welcome />} />
+					<Route path="notes">
+						<Route index element={<NotesList />} />
+					</Route>
+					<Route path="users">
+						<Route index element={<UsersList />} />
+					</Route>
+				</Route>
+				{/* End Dash*/}
+			</Route>
+			{/* End Layout */}
+		</Routes>
+	);
+};
 
 export default App;
