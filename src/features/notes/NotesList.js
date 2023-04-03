@@ -1,49 +1,63 @@
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPenToSquare } from "@fortawesome/free-solid-svg-icons";
-import { useNavigate } from "react-router-dom";
+import { useGetNotesQuery } from "./notesApiSlice";
+import Note from "./Note";
 
-import { useSelector } from "react-redux";
-import { selectNoteById } from "./notesApiSlice";
+const NotesList = () => {
+	const {
+		data: notes,
+		isLoading,
+		isSuccess,
+		isError,
+		error,
+	} = useGetNotesQuery(undefined, {
+		pollingInterval: 15000,
+		refetchOnFocus: true,
+		refetchOnMountOrArgChange: true,
+	});
 
-const Note = ({ noteId }) => {
-	const note = useSelector((state) => selectNoteById(state, noteId));
+	let content;
 
-	const navigate = useNavigate();
+	if (isLoading) content = <p>Loading...</p>;
 
-	if (note) {
-		const created = new Date(note.createdAt).toLocaleString("en-US", {
-			day: "numeric",
-			month: "long",
-		});
+	if (isError) {
+		content = <p className="errmsg">{error?.data?.message}</p>;
+	}
 
-		const updated = new Date(note.updatedAt).toLocaleString("en-US", {
-			day: "numeric",
-			month: "long",
-		});
+	if (isSuccess) {
+		const { ids } = notes;
 
-		const handleEdit = () => navigate(`/dash/notes/${noteId}`);
+		const tableContent = ids?.length
+			? ids.map((noteId) => <Note key={noteId} noteId={noteId} />)
+			: null;
 
-		return (
-			<tr className="table__row">
-				<td className="table__cell note__status">
-					{note.completed ? (
-						<span className="note__status--completed">Completed</span>
-					) : (
-						<span className="note__status--open">Open</span>
-					)}
-				</td>
-				<td className="table__cell note__created">{created}</td>
-				<td className="table__cell note__updated">{updated}</td>
-				<td className="table__cell note__title">{note.title}</td>
-				<td className="table__cell note__username">{note.username}</td>
-
-				<td className="table__cell">
-					<button className="icon-button table__button" onClick={handleEdit}>
-						<FontAwesomeIcon icon={faPenToSquare} />
-					</button>
-				</td>
-			</tr>
+		content = (
+			<table className="table table--notes">
+				<thead className="table__thead">
+					<tr>
+						<th scope="col" className="table__th note__status">
+							Username
+						</th>
+						<th scope="col" className="table__th note__created">
+							Created
+						</th>
+						<th scope="col" className="table__th note__updated">
+							Updated
+						</th>
+						<th scope="col" className="table__th note__title">
+							Title
+						</th>
+						<th scope="col" className="table__th note__username">
+							Owner
+						</th>
+						<th scope="col" className="table__th note__edit">
+							Edit
+						</th>
+					</tr>
+				</thead>
+				<tbody>{tableContent}</tbody>
+			</table>
 		);
-	} else return null;
+	}
+
+	return content;
 };
-export default Note;
+export default NotesList;
